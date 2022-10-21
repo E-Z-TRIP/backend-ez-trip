@@ -6,7 +6,7 @@ const programSchema = mongoose.Schema({
     price: Number,
    });
 
-const tripSchema = mongoose.Schema({
+   const tripSchema = mongoose.Schema({
     name: String, 
     country: String,
     partnerID: [{ type: mongoose.Schema.Types.ObjectId, ref: "partners"}],
@@ -23,6 +23,6 @@ const tripSchema = mongoose.Schema({
     program: programSchema,
    });
    
-   const Trip = mongoose.model('trips', todoSchema);
+   const Trip = mongoose.model('trips', tripSchema);
    
-   module.exports = Trip;
+   export default Trip;
