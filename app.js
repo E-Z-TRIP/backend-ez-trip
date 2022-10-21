@@ -14,6 +14,7 @@ import connectToDatbase from './db/mongo_db_connector.js';
 
 // ROUTER IMPORTS
 import indexRouter from './routes/index.js';
+import partnerRouter from './routes/partners'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || '3000';
