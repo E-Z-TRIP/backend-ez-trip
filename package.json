@@ -29,7 +29,8 @@
     "morgan": "^1.10.0",
     "node-fetch": "^3.2.10",
     "uid2": "^1.0.0",
-    "uniqid": "^5.4.0"
+    "uniqid": "^5.4.0",
+    "uniquid": "^1.1.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"

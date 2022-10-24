@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url';
 import logger from 'morgan';
 import chalk from 'chalk';
 import connectToDatbase from './db/mongo_db_connector.js';
+import fileUpload from 'express-fileupload';
 
 // ROUTER IMPORTS
 import indexRouter from './routes/index.js';
@@ -20,6 +21,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || '3000';
 const STATIC = path.join(__dirname, 'public');
 const app = express();
+app.use(fileUpload());
 
 // DATABASE CONNECTOR
 connectToDatbase().catch((err) => console.log(err));

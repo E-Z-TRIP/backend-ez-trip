@@ -6,6 +6,10 @@ import { validateReqBody } from '../lib/helpers.js';
 import User from '../db/models/User.js';
 const router = express.Router();
 import { checkBody } from '../lib/helpers.js';
+import cloudinary from 'cloudinary.v2';
+import fs from 'fs';
+import uniqid from 'uniqid';
+
 
 
 //SIGN-UP ROUTE
@@ -77,6 +81,7 @@ router.post('/signup', (req, res) => {
     });
   });
 
+
     ///////////LIKE ROUTES
 
     router.post('/like', (req, res) => {
@@ -101,6 +106,7 @@ router.post('/signup', (req, res) => {
     });
 
 
+
 //////GET THE TRIPS LIKED BY USER
 
 router.get('/tripsLiked/:token', (req, res) => {
@@ -123,6 +129,47 @@ router.get('/tripsLiked/:token', (req, res) => {
   });
 
 })
+
+    /////AJOUTER UN DOCUMENT A SON ESPACE
+
+    router.post('/upload', async (req, res) => {
+      // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
+      if (!checkBody(req.body, ['token'])){
+          res.json({ result: false, error: 'User not connected' });
+        return;
+      }
+
+      const docPath = `./tmp/${uniqid()}.jpg`;
+      const resultMove = await req.files.photoFromFront.mv(docPath);
+      //if resultMove renvoie undefined, l'opération a fonctionné
+      if(!resultMove) {
+        
+        const resultCloudinary = await cloudinary.uploader.upload(docPath);
+      
+      //Trouve le bon User à qui rajouter le document, via le token renvoyé par le front
+      User.findOne({ token: req.body.token }).then(data => {
+        if(data) {
+          //push l'URL du document qui vient d'être uploadé sur Cloudinary
+          User.updateOne({_id: data.id}, {$push:{"documents":resultCloudinary.secure_url}})
+          res.json({ result: true, documentSaved: resultCloudinary.secure_url });
+        }
+        //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+        else {
+            res.json({ result: false, error: 'User not found' });
+        }
+    });
+    } 
+
+    //if the resultMove didn't work:
+    else {
+        res.json({ result: false, error: resultCopy });
+      }
+    
+      // delete the temporary copy
+      fs.unlinkSync(photoPath);
+
+     
+    });
 
 
 export default router;
