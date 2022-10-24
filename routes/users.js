@@ -10,7 +10,7 @@ import cloudinary from 'cloudinary.v2';
 import fs from 'fs';
 import uniqid from 'uniqid';
 
-
+/////////////////////////////////////////////////////////////////////SIGN-IN & SIGN-UP///////////////////////////////////////////////////////
 
 //SIGN-UP ROUTE
 
@@ -57,7 +57,8 @@ router.post('/signup', (req, res) => {
   });
   
 
-  //SIGN-IN ROUTE
+  ///////SIGN-IN ROUTE
+
   router.post('/signin', (req, res) => {
     if (!validateReqBody({body: req.body, expectedPropertys:['email', 'password']})){
         res.json({ result: false, error: 'Missing or empty fields' });
@@ -81,8 +82,9 @@ router.post('/signup', (req, res) => {
     });
   });
 
+/////////////////////////////////////////////////////////////////LIKES/////////////////////////////////////////////////////////////////
 
-    ///////////LIKE ROUTES
+/////LIKE ROUTES
 
     router.post('/like', (req, res) => {
       // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
@@ -107,7 +109,7 @@ router.post('/signup', (req, res) => {
 
 
 
-//////GET THE TRIPS LIKED BY USER
+////GET THE TRIPS LIKED BY USER
 
 router.get('/tripsLiked/:token', (req, res) => {
   // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
@@ -129,6 +131,7 @@ router.get('/tripsLiked/:token', (req, res) => {
   });
 
 })
+//////////////////////////////////////////////////////////// DOCUMENTS ///////////////////////////////////////////////////////////////////////////
 
     /////AJOUTER UN DOCUMENT A SON ESPACE
 
@@ -170,6 +173,31 @@ router.get('/tripsLiked/:token', (req, res) => {
 
      
     });
+
+  //////GET THE DOCUMENTS BY USER
+
+  router.get('/docs/:token', (req, res) => {
+    // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas avoir de documents à afficher.
+    if (!req.params) {
+        res.json({ result: false, error: 'User not connected' });
+      return;
+    }
+  
+      User.findOne({ token: req.body.token })
+      .then(data => {
+        if(data) {
+          //renvoi un array d'URL à afficher dans le front
+          res.json({ result: true, documents: data.documents });
+        }
+        //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+        else {
+            res.json({ result: false, error: 'User not found' });
+        }
+    });
+  
+  })
+
+
 
 
 export default router;
