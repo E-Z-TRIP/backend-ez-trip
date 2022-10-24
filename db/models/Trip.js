@@ -13,7 +13,7 @@ const programSchema = mongoose.Schema({
     addressDeparture: String,
     minDurationDay: Number,
     maxDurationDay: Number,
-    travelPeriod: [{start: Date, end: Date}],
+    travelPeriod: [{start: String, end: String}],
     description: String,
     included: [String],
     nonIncluded: [String],
