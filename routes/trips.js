@@ -53,22 +53,29 @@ router.get('/filter', (req, res) => {
     //Array de réponse où push les résultats du filtre
     const response = []
     //définition des constantes de mois pour comparer à l'intervale
-    let minDay = (filters.minDurationDay ? filters.minDurationDay : undefined)
-    let maxDay = (filters.maxDurationDay ? filters.maxDurationDay : undefined)
-    let startDate = (filters.startDate ? filters.startDate : undefined)
-    let endDate = (filters.endDate ? filters.endDate : undefined)
+    let minDay = (filters.minDurationDay ? filters.minDurationDay : 1)
+    let maxDay = (filters.maxDurationDay ? filters.maxDurationDay : 365)
+    let startMonth = (filters.startMonth ? filters.startMonth : 0)
+    let endMonth = (filters.endMonth ? filters.endMonth : 12)
+    let priceMin = (filters.priceMin ? filters.endMonth : 0)
+    let priceMax = (filters.priceMax ? filters.endMonth : 30000)
+
 
         Trip.find()
         .then(data => {
             
             for (let key in filters) {
                 //Si les filtres mentionnent des intervalles de temps :
-                if (key === 'minDurationDay' || key === 'maxDurationDay' || key === 'startDate' || key === 'endDate') {
-                    
+                if (key === 'minDurationDay' || key === 'maxDurationDay' || key === 'startMonth' || key === 'endMonth' || key === 'priceMax' || key === 'priceMin') {
+                    data.map(trip => {
+                        (trip.price >= priceMin && trip.price <= priceMax) && (trip.minDurationDay >= minDay && trip.maxDurationDay <= maxDay) && (trip.travelPeriod.start >= startMonth && trip.travelPeriod.end <= endMonth) && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
+                })
                 }
                 //Si les filtres sont des arrays de strings
                 else if (key === 'tags', key === 'included') {
-
+                    data.map(trip => {
+                        trip.tags.indexOf(filters[key]) != -1 && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
+                })
                 }
                 //pour tous les autres query parameters : 
                 else {
