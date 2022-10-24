@@ -6,11 +6,11 @@ import { validateReqBody } from '../lib/helpers.js';
 import User from '../db/models/User.js';
 const router = express.Router();
 import { checkBody } from '../lib/helpers.js';
-import cloudinary from 'cloudinary.v2';
+import cloudinary from 'cloudinary';
 import fs from 'fs';
 import uniqid from 'uniqid';
 
-/////////////////////////////////////////////////////////////////////SIGN-IN & SIGN-UP///////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////CREATE, HANDLE & DELETE USER INFOS///////////////////////////////////////////////////////
 
 //SIGN-UP ROUTE
 
@@ -81,6 +81,19 @@ router.post('/signup', (req, res) => {
         }
     });
   });
+
+    ///////DELETE ROUTE
+
+    router.delete('/', (req, res) => {
+      // Si le token n'est pas reçu, il y a une erreur du côté de l'envoi du front.
+      if (!req.body.token) {
+        res.json({ result: false, error: 'Faulty front-end info' });
+      }
+
+      User.deleteOne({ token: req.body.token }).then(() => {
+        res.json({ result: true });
+      });
+      })
 
 /////////////////////////////////////////////////////////////////LIKES/////////////////////////////////////////////////////////////////
 
