@@ -3,6 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import uid2 from 'uid2';
 import { validateReqBody } from '../lib/helpers.js';
+import { checkBody } from '../lib/helpers.js';
 import User from '../db/models/User.js';
 const router = express.Router();
 import { checkBody } from '../lib/helpers.js';
@@ -10,7 +11,7 @@ import cloudinary from 'cloudinary';
 import fs from 'fs';
 import uniqid from 'uniqid';
 
-
+/////////////////////////////////////////////////////////////////////CREATE, HANDLE & DELETE USER INFOS///////////////////////////////////////////////////////
 
 //SIGN-UP ROUTE
 
@@ -57,7 +58,8 @@ router.post('/signup', (req, res) => {
   });
   
 
-  //SIGN-IN ROUTE
+  ///////SIGN-IN ROUTE
+
   router.post('/signin', (req, res) => {
     if (!validateReqBody({body: req.body, expectedPropertys:['email', 'password']})){
         res.json({ result: false, error: 'Missing or empty fields' });
@@ -81,8 +83,73 @@ router.post('/signup', (req, res) => {
     });
   });
 
+  /////////GET USER INFOS
 
-    ///////////LIKE ROUTES
+router.get('/:token', (req, res) => {
+  // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
+  if (!req.params.token) {
+      res.json({ result: false, error: 'User not connected' });
+    return;
+  }
+
+    User.findOne({ token: req.params.token })
+    .then(data => {
+      if(data) {
+        const { firstName, lastName, inscriptionDate, email, address, country, preference } = data;
+        //renvoi tous les objets contenus dans tripsLiked
+        res.json({ result: true, user: {firstName, lastName, inscriptionDate, email, address, country, preference}});
+      }
+      //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+      else {
+          res.json({ result: false, error: 'User not found' });
+      }
+  });
+
+})
+
+  //////UPDATE USER INFOS
+
+  router.put('/:token/update', (req, res) => {
+    if (!req.params.token) {
+      res.json({ result: false, error: 'User not connected' });
+    return;
+  }
+
+    User.findOne({ token: req.params.token }).then(data => {
+              if(data) {
+                const newInfo = req.body.info
+                const toUpdate = req.body.field
+                console.log(newInfo, toUpdate);
+                const update = {};
+                update[toUpdate]=newInfo;
+                // change la donnée indiquée en params sur l'utilisateur identifié par son token
+                User.updateOne({_id: data.id}, {$set: update})
+                .then( res.json({ result: true, userModified: data }))
+              }
+              //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+              else {
+                  res.json({ result: false, error: 'User not found' });
+              }
+          });
+});
+
+
+    ///////DELETE USER PROFILE
+
+    router.delete('/', (req, res) => {
+      // Si le token n'est pas reçu, il y a une erreur du côté de l'envoi du front.
+      if (!req.body.token) {
+        res.json({ result: false, error: 'Faulty front-end info' });
+      }
+
+      User.deleteOne({ token: req.body.token }).then(() => {
+        res.json({ result: true });
+      });
+      })
+
+/////////////////////////////////////////////////////////////////LIKES/////////////////////////////////////////////////////////////////
+
+/////LIKE ROUTES REQ.BODY = token, tripID
 
     router.post('/like', (req, res) => {
       // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
@@ -95,8 +162,9 @@ router.post('/signup', (req, res) => {
       User.findOne({ token: req.body.token }).then(data => {
           if(data) {
             //push l'ID du trip liked dans la BDD
-            User.updateOne({_id: data.id}, {$push:{"tripsLiked":req.body.tripID}})
-            res.json({ result: true, tripsLiked: data.tripsLiked });
+            data.tripsLiked.push(req.body.tripID);
+            data.save();
+            res.json({ result: true, user: data});
           }
           //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
           else {
@@ -105,32 +173,59 @@ router.post('/signup', (req, res) => {
       });
     });
 
+////GET THE TRIPS LIKED BY USER
 
-
-//////GET THE TRIPS LIKED BY USER
-
-router.get('/tripsLiked/:token', (req, res) => {
+router.get('/like/:token', (req, res) => {
   // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
-  if (!req.params) {
+  if (!req.params.token) {
       res.json({ result: false, error: 'User not connected' });
     return;
   }
 
-    User.findOne({ token: req.body.token }).populate('tripsLiked')
+    User.findOne({ token: req.params.token }).populate('tripsLiked')
     .then(data => {
       if(data) {
         //renvoi tous les objets contenus dans tripsLiked
-        res.json({ result: true, tripsLiked: data.tripsLiked });
+        res.json({ result: true, tripsLiked: data.populate('tripsLiked') });
       }
       //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
       else {
           res.json({ result: false, error: 'User not found' });
       }
   });
+})
+
+////DELETE A TRIP FROM THE LIKES REQ.BODY = token, tripID
+
+router.delete('/like', (req, res) => {
+
+   // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
+   if (!checkBody(req.body, ['token'])){
+    res.json({ result: false, error: 'User not connected' });
+    return;
+}
+
+User.findOne({ token: req.body.token })
+  .populate('tripsLiked')
+  .then(data => {
+  if(data) {
+    //retirer le trip dont l'ID correspond à celui envoyé du front
+    data.tripsLiked.pull({_id: req.body.tripId});
+    data.save();
+    res.json({ result: true, likes: data.tripsLiked });
+  }
+  //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+  else {
+      res.json({ result: false, error: 'User not found' });
+  }
+});
 
 })
 
-    /////AJOUTER UN DOCUMENT A SON ESPACE
+
+//////////////////////////////////////////////////////////// DOCUMENTS ///////////////////////////////////////////////////////////////////////////
+
+    /////AJOUTER UN DOCUMENT A SON ESPACE : REQ.BODY = token, formData
 
     router.post('/upload', async (req, res) => {
       // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
@@ -150,7 +245,7 @@ router.get('/tripsLiked/:token', (req, res) => {
       User.findOne({ token: req.body.token }).then(data => {
         if(data) {
           //push l'URL du document qui vient d'être uploadé sur Cloudinary
-          User.updateOne({_id: data.id}, {$push:{"documents":resultCloudinary.secure_url}})
+          data.documents.push(resultCloudinary.secure_url)
           res.json({ result: true, documentSaved: resultCloudinary.secure_url });
         }
         //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
@@ -164,13 +259,57 @@ router.get('/tripsLiked/:token', (req, res) => {
     else {
         res.json({ result: false, error: resultCopy });
       }
-    
       // delete the temporary copy
       fs.unlinkSync(photoPath);
 
      
     });
 
+  //////GET THE DOCUMENTS BY USER
+
+  router.get('/docs/:token', (req, res) => {
+    // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas avoir de documents à afficher.
+    if (!req.params) {
+        res.json({ result: false, error: 'User not connected' });
+      return;
+    }
+  
+      User.findOne({ token: req.body.token })
+      .then(data => {
+        if(data) {
+          //renvoi un array d'URL à afficher dans le front
+          res.json({ result: true, documents: data.documents });
+        }
+        //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+        else {
+            res.json({ result: false, error: 'User not found' });
+        }
+    });
+  
+  })
+
+  //////DELETE A DOCUMENT. REQ.BODY : token, url
+
+
+  router.delete('/docs', (req, res) => {
+    // Si le token n'est pas reçu dans le body, le User n'est pas connecté
+    if (!req.body.token) {
+        res.json({ result: false, error: 'User not connected' });
+      return;
+    }
+  
+      User.findOne({ token: req.body.token })
+      .then(data => {
+        if(data) {
+          User.documents.pull(req.body.url)
+          res.json({ result: true, documents: data.documents });
+        }
+        //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+        else {
+            res.json({ result: false, error: 'User not found' });
+        }
+    });
+  })
 
 export default router;
 
