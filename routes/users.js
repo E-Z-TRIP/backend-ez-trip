@@ -82,7 +82,7 @@ router.post('/signup', (req, res) => {
     });
   });
 
-  //////GET USER INFOS
+  /////////GET USER INFOS
 
 router.get('/:token', (req, res) => {
   // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
@@ -94,8 +94,9 @@ router.get('/:token', (req, res) => {
     User.findOne({ token: req.params.token })
     .then(data => {
       if(data) {
+        const { firstName, lastName, inscriptionDate, email, address, country, preference } = data;
         //renvoi tous les objets contenus dans tripsLiked
-        res.json({ result: true, user: data});
+        res.json({ result: true, user: {firstName, lastName, inscriptionDate, email, address, country, preference}});
       }
       //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
       else {
@@ -107,7 +108,7 @@ router.get('/:token', (req, res) => {
 
   //////UPDATE USER INFOS
 
-  router.put('/:token/:key', (req, res) => {
+  router.put('/:token/update', (req, res) => {
     if (!req.params.token) {
       res.json({ result: false, error: 'User not connected' });
     return;
@@ -115,10 +116,14 @@ router.get('/:token', (req, res) => {
 
     User.findOne({ token: req.params.token }).then(data => {
               if(data) {
-                const key = req.params.key
-                //change la donnée indiquée en params sur l'utilisateur identifié par son token
-                User.updateOne({id: data.id}, {$set: {[req.params.key]: key}}, { upsert: true })
-                res.json({ result: true, userModified: data });
+                const newInfo = req.body.info
+                const toUpdate = req.body.field
+                console.log(newInfo, toUpdate);
+                const update = {};
+                update[toUpdate]=newInfo;
+                // change la donnée indiquée en params sur l'utilisateur identifié par son token
+                User.updateOne({_id: data.id}, {$set: update})
+                .then( res.json({ result: true, userModified: data }))
               }
               //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
               else {
