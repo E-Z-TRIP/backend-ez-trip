@@ -6,6 +6,11 @@ const programSchema = mongoose.Schema({
     price: Number,
    });
 
+const travelPeriodSchema = mongoose.Schema([{
+    start: Number, 
+    end: Number
+}])
+
    const tripSchema = mongoose.Schema({
     name: String, 
     country: String,
@@ -13,7 +18,7 @@ const programSchema = mongoose.Schema({
     addressDeparture: String,
     minDurationDay: Number,
     maxDurationDay: Number,
-    travelPeriod: [{start: String, end: String}],
+    travelPeriod: travelPeriodSchema,
     description: String,
     included: [String],
     nonIncluded: [String],

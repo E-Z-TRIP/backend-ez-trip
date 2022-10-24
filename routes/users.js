@@ -6,7 +6,7 @@ import { validateReqBody } from '../lib/helpers.js';
 import User from '../db/models/User.js';
 const router = express.Router();
 import { checkBody } from '../lib/helpers.js';
-import cloudinary from 'cloudinary.v2';
+import cloudinary from 'cloudinary';
 import fs from 'fs';
 import uniqid from 'uniqid';
 
