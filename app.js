@@ -18,6 +18,7 @@ import indexRouter from './routes/index.js';
 import userRouter from './routes/users.js';
 import partnersRouter from './routes/partners.js';
 import ordersRouter from './routes/orders.js';
+import tripsRouter from './routes/trips.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || '3000';
@@ -41,6 +42,7 @@ app.use('/', indexRouter);
 app.use('/partners', partnersRouter);
 app.use('/orders', ordersRouter);
 app.use('/users', userRouter);
+app.use('/trips', tripsRouter);
 
 
 // PORT LISTENER
