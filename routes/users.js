@@ -82,7 +82,53 @@ router.post('/signup', (req, res) => {
     });
   });
 
-    ///////DELETE ROUTE
+  //////GET USER INFOS
+
+router.get('/:token', (req, res) => {
+  // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
+  if (!req.params.token) {
+      res.json({ result: false, error: 'User not connected' });
+    return;
+  }
+
+    User.findOne({ token: req.params.token })
+    .then(data => {
+      if(data) {
+        //renvoi tous les objets contenus dans tripsLiked
+        res.json({ result: true, user: data});
+      }
+      //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+      else {
+          res.json({ result: false, error: 'User not found' });
+      }
+  });
+
+})
+
+  //////UPDATE USER INFOS
+
+  router.put('/:token/:key', (req, res) => {
+    if (!req.params.token) {
+      res.json({ result: false, error: 'User not connected' });
+    return;
+  }
+
+    User.findOne({ token: req.params.token }).then(data => {
+              if(data) {
+                const key = req.params.key
+                //change la donnée indiquée en params sur l'utilisateur identifié par son token
+                User.updateOne({id: data.id}, {$set: {[req.params.key]: key}}, { upsert: true })
+                res.json({ result: true, userModified: data });
+              }
+              //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+              else {
+                  res.json({ result: false, error: 'User not found' });
+              }
+          });
+});
+
+
+    ///////DELETE USER
 
     router.delete('/', (req, res) => {
       // Si le token n'est pas reçu, il y a une erreur du côté de l'envoi du front.
