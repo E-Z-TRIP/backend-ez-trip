@@ -62,7 +62,7 @@ router.post('/trips', async (req, res) => {
         description,
         included, //* le front envoie un tableau de strings
         nonIncluded, //* le front envoie un tableau de strings
-        photos, //* le front envoie un tableau de strings
+        // photos, //* le front envoie un tableau de strings
         background,
         tags, //* le front envoie un tableau de strings
         // program :[  {
@@ -78,7 +78,9 @@ router.post('/trips', async (req, res) => {
     }
   });
 
-//*
+//* add program
+
+//* add photos
 
 
 export default router;
