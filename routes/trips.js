@@ -74,7 +74,7 @@ router.get('/filter', (req, res) => {
                 //Si les filtres sont des arrays de strings
                 else if (key === 'tags', key === 'included') {
                     data.map(trip => {
-                        trip.tags.indexOf(filters[key]) != -1 && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
+                        trip[key].indexOf(filters[key]) != -1 && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
                 })
                 }
                 //pour tous les autres query parameters : 
@@ -87,10 +87,11 @@ router.get('/filter', (req, res) => {
                 
             }
             console.log(response);
+            //si la réponse contient au moins un trip, renvoyer la réponse
             if(response.length > 0) {
                 res.json({ result: true, trips: response});
               }
-        
+            // si la réponse est vide, aucun voyage ne correspond à la recherche
               else {
                   res.json({ result: false, error: 'No trips corresponding to the filters' });
               }
