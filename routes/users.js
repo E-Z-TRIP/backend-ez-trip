@@ -6,7 +6,6 @@ import { validateReqBody } from '../lib/helpers.js';
 import { checkBody } from '../lib/helpers.js';
 import User from '../db/models/User.js';
 const router = express.Router();
-import { checkBody } from '../lib/helpers.js';
 import cloudinary from 'cloudinary';
 import fs from 'fs';
 import uniqid from 'uniqid';
@@ -151,13 +150,12 @@ router.get('/:token', (req, res) => {
 
 /////LIKE ROUTES REQ.BODY = token, tripID
 
-    router.post('/like', (req, res) => {
+    router.post('/addlike', (req, res) => {
       // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
       if (!validateReqBody({body: req.body, expectedPropertys:['token', 'tripID']})){
           res.json({ result: false, error: 'User not connected' });
         return;
       }
-      
       //Trouve le bon User à qui rajouter le trip liké, via le token renvoyé par le front
       User.findOne({ token: req.body.token }).then(data => {
           if(data) {
@@ -176,9 +174,11 @@ router.get('/:token', (req, res) => {
 ////GET THE TRIPS LIKED BY USER
 
 router.get('/like/:token', (req, res) => {
+  console.log(req.params);
   // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
   if (!req.params.token) {
-      res.json({ result: false, error: 'User not connected' });
+    
+    res.json({ result: false, error: 'User not connected' });
     return;
   }
 
@@ -186,7 +186,7 @@ router.get('/like/:token', (req, res) => {
     .then(data => {
       if(data) {
         //renvoi tous les objets contenus dans tripsLiked
-        res.json({ result: true, tripsLiked: data.populate('tripsLiked') });
+        res.json({ result: true, tripsLiked: data.tripsLiked });
       }
       //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
       else {

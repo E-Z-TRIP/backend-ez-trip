@@ -9,7 +9,6 @@ import cloudinary from 'cloudinary';
 import fs from 'fs';
 import uniqid from 'uniqid';
 
-
 /////GET ALL TRIPS
 
 router.get('/', (req, res) => {
@@ -17,6 +16,7 @@ router.get('/', (req, res) => {
       Trip.find()
       .then(data => {
         if(data) {
+           console.log(data[0].program)
           res.json({ result: true, trips: data});
         }
 
@@ -33,7 +33,6 @@ router.get('/', (req, res) => {
 
     Trip.find({name: req.params.partner})
     .then(data => {
-        console.log(data);
 
       if(data && data.length > 0) {
         res.json({ result: true, trips: data.trips});
@@ -50,25 +49,35 @@ router.get('/', (req, res) => {
 
 router.get('/filter', (req, res) => {
     const filters = req.query;
+    console.log(filters)
     //Array de réponse où push les résultats du filtre
     const response = []
     //définition des constantes de mois pour comparer à l'intervale
     let minDay = (filters.minDurationDay ? filters.minDurationDay : 1)
     let maxDay = (filters.maxDurationDay ? filters.maxDurationDay : 365)
-    let startMonth = (filters.startMonth ? filters.startMonth : 0)
+    let startMonth = (filters.startMonth ? filters.startMonth : 1)
     let endMonth = (filters.endMonth ? filters.endMonth : 12)
-    let priceMin = (filters.priceMin ? filters.endMonth : 0)
-    let priceMax = (filters.priceMax ? filters.endMonth : 30000)
-
+    let minBudget = (filters.minBudget ? filters.minBudget : 0)
+    let maxBudget = (filters.maxBudget ? filters.maxBudget : 30000)
 
         Trip.find()
         .then(data => {
             
             for (let key in filters) {
-                //Si les filtres mentionnent des intervalles de temps :
-                if (key === 'minDurationDay' || key === 'maxDurationDay' || key === 'startMonth' || key === 'endMonth' || key === 'priceMax' || key === 'priceMin') {
-                    data.map(trip => {
-                        (trip.price >= priceMin && trip.price <= priceMax) && (trip.minDurationDay >= minDay && trip.maxDurationDay <= maxDay) && (trip.travelPeriod.start >= startMonth && trip.travelPeriod.end <= endMonth) && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
+                //Si les filtres concernent des nombres (et donc des intervales, type date, prix...)
+                if (typeof Number(filters[key]) === 'number') {
+                    data.map((trip,i) => {
+                        let minPriceTrip = trip.program[0].price; //prix du plus court programme = "à partir de...€"
+                        // console.log('TRIP N°' + i)
+                        // console.log('priceTrip', minPriceTrip,maxPriceTrip)
+                        // console.log('priceSearch', minBudget,maxBudget)
+                        // console.log('durationDayTrip', trip.minDurationDay, trip.maxDurationDay)
+                        // console.log('durationDaySearch', minDay, maxDay)
+                        // console.log('travelPeriodTrip', trip.travelPeriod[0].start, trip.travelPeriod[0].end)
+                        // console.log('travelPeriodSearch', startMonth, endMonth)
+
+                       if ((minPriceTrip >= minBudget && minPriceTrip <= maxBudget) && (trip.minDurationDay >= minDay && trip.maxDurationDay <= maxDay) && (trip.travelPeriod[0].start >= startMonth && trip.travelPeriod[0].end <= endMonth) && response.filter(e => e.id === trip.id).length === 0) 
+                       {response.push(trip)};
                 })
                 }
                 //Si les filtres sont des arrays de strings
@@ -82,11 +91,9 @@ router.get('/filter', (req, res) => {
                     data.map(trip => {
                         trip[key] == filters[key] && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
                 })
-
                 }
                 
-            }
-            console.log(response);
+            };
             //si la réponse contient au moins un trip, renvoyer la réponse
             if(response.length > 0) {
                 res.json({ result: true, trips: response});
