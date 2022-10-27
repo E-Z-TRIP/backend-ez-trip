@@ -32,11 +32,14 @@ router.post('/signup', (req, res) => {
           token: uid2(32),
           firstName: req.body.firstName,
           lastName: req.body.lastName,
+          email: req.body.email,
           password: hash,
           inscriptionDate: date,
-          email: req.body.email,
-          address: req.body.address,
-          tags: req.body.tags,
+          address: req.body.address ? req.body.address : null,
+          country: country ? country : null,
+          sexe: sexe ? sexe : null,
+          birthDate: birthDate ? birthDate : null,
+          preferences: req.body.tags ? [req.body.tags] : [],
           likes: [],
           booked: [],
           document: [],
@@ -151,6 +154,9 @@ router.get('/:token', (req, res) => {
 /////LIKE ROUTES REQ.BODY = token, tripID
 
     router.post('/addlike', (req, res) => {
+      console.log(req.body.token)
+      console.log(req.body.tripID)
+
       // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
       if (!validateReqBody({body: req.body, expectedPropertys:['token', 'tripID']})){
           res.json({ result: false, error: 'User not connected' });
@@ -162,7 +168,8 @@ router.get('/:token', (req, res) => {
             //push l'ID du trip liked dans la BDD
             data.tripsLiked.push(req.body.tripID);
             data.save();
-            res.json({ result: true, user: data});
+            console.log("trip successfully saved");
+            res.json({ result: true, tripLiked: req.body.tripID});
           }
           //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
           else {
@@ -182,9 +189,10 @@ router.get('/like/:token', (req, res) => {
     return;
   }
 
-    User.findOne({ token: req.params.token }).populate('tripsLiked')
+    User.findOne({ token: req.params.token })
     .then(data => {
       if(data) {
+        console.log('result like/token', data.tripsLiked)
         //renvoi tous les objets contenus dans tripsLiked
         res.json({ result: true, tripsLiked: data.tripsLiked });
       }
