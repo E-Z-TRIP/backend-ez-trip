@@ -27,6 +27,23 @@ router.get('/', (req, res) => {
   
   })
 
+  /////GET TRIP BY ID
+
+router.get('/tripById/:token', (req, res) => {
+
+  Trip.findOne({id: req.body.id})
+  .then(data => {
+    if(data) {
+      res.json({ result: true, trip: data});
+    }
+
+    else {
+        res.json({ result: false, error: 'Trip not found' });
+    }
+});
+
+})
+
   ///GET TRIPS BY PARTNER
 
   router.get('/byPartner/:partner', (req, res) => {

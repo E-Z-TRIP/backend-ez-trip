@@ -165,6 +165,7 @@ router.get('/:token', (req, res) => {
       //Trouve le bon User à qui rajouter le trip liké, via le token renvoyé par le front
       User.findOne({ token: req.body.token }).then(data => {
           if(data) {
+            
             //push l'ID du trip liked dans la BDD
             data.tripsLiked.push(req.body.tripID);
             data.save();
@@ -214,7 +215,6 @@ router.delete('/like', (req, res) => {
 }
 
 User.findOne({ token: req.body.token })
-  .populate('tripsLiked')
   .then(data => {
   if(data) {
     //retirer le trip dont l'ID correspond à celui envoyé du front
