@@ -193,7 +193,6 @@ router.get('/like/:token', (req, res) => {
     User.findOne({ token: req.params.token })
     .then(data => {
       if(data) {
-        console.log('result like/token', data.tripsLiked)
         //renvoi tous les objets contenus dans tripsLiked
         res.json({ result: true, tripsLiked: data.tripsLiked });
       }
@@ -206,30 +205,25 @@ router.get('/like/:token', (req, res) => {
 
 ////DELETE A TRIP FROM THE LIKES REQ.BODY = token, tripID
 
-router.delete('/like', (req, res) => {
+router.delete('/like', async (req, res) => {
 
+  console.log("req.body", req.body);
    // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
-   if (!checkBody(req.body, ['token'])){
+   if (!checkBody(req.body, ['token']))
+   {console.log('ata');
     res.json({ result: false, error: 'User not connected' });
     return;
-}
+    }
 
-User.findOne({ token: req.body.token })
-  .then(data => {
-  if(data) {
-    //retirer le trip dont l'ID correspond à celui envoyé du front
-    data.tripsLiked.pull({_id: req.body.tripId});
-    data.save();
-    res.json({ result: true, likes: data.tripsLiked });
-  }
-  //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
-  else {
-      res.json({ result: false, error: 'User not found' });
-  }
-});
+   await User.updateOne({token: req.body.token}, {$pull: {tripsLiked: req.body.tripID}})
+   
+   res.json({result: true})
+// User.findOne({token: req.body.token}).then((data) => {
+//   data.tripsLiked.pull(req.body.tripID);
+//   data.save();
+// }).then(res.json({result: true}))
 
 })
-
 
 //////////////////////////////////////////////////////////// DOCUMENTS ///////////////////////////////////////////////////////////////////////////
 

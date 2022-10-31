@@ -16,7 +16,6 @@ router.get('/', (req, res) => {
       Trip.find()
       .then(data => {
         if(data) {
-           console.log(data[0].program)
           res.json({ result: true, trips: data});
         }
 
@@ -29,11 +28,12 @@ router.get('/', (req, res) => {
 
   /////GET TRIP BY ID
 
-router.get('/tripById/:token', (req, res) => {
-
-  Trip.findOne({id: req.body.id})
+router.get('/tripById/:id', (req, res) => {
+  console.log('params:', req.params.id)
+  Trip.findOne({_id: req.params.id})
   .then(data => {
     if(data) {
+      console.log(data);
       res.json({ result: true, trip: data});
     }
 
