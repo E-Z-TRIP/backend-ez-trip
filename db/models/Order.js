@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
 
+
+
 const orderSchema = mongoose.Schema({
-    userId : [{type: mongoose.Schema.Types.ObjectId, ref : 'users'}],
+    user : [{type: mongoose.Schema.Types.ObjectId, ref : 'users'}],
     trip : [{type: mongoose.Schema.Types.ObjectId, ref: 'trips'}],
-    bookingDate: Date,
+    start : Date,
+    end : Date,
     nbDays: Number,
     nbTravelers: Number,
     comments: String,
