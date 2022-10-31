@@ -36,6 +36,23 @@ router.post('/', async (req, res) => {
     }
   });
 
+  //* GET AN ORDER TO DISPLAY - QUOTATION RECEIVED
+
+  router.get('/offer', (req, res) => {
+    const {id} = req.body
+    Order.findById({_id : id})
+    .populate('trip')
+    .then((data) => {
+      if (data) {
+        res.json({result:true, data : data})
+      }
+      else {
+        res.json({result: false, error : 'order not found'})
+      }
+    })
+  })
+
+
   //* UPDATE LE STATUS
   //? a tester lorsque l'on aura one order
 
