@@ -14,7 +14,6 @@ import connectToDatbase from './db/mongo_db_connector.js';
 import fileUpload from 'express-fileupload';
 
 // ROUTER IMPORTS
-import indexRouter from './routes/index.js';
 import userRouter from './routes/users.js';
 import partnersRouter from './routes/partners.js';
 import ordersRouter from './routes/orders.js';
@@ -38,12 +37,10 @@ app.use(cookieParser());
 app.use(express.static(STATIC));
 
 // ROUTERS MIDDLEWARE
-app.use('/', indexRouter);
 app.use('/partners', partnersRouter);
 app.use('/orders', ordersRouter);
 app.use('/users', userRouter);
 app.use('/trips', tripsRouter);
-
 
 // PORT LISTENER
 app.listen(PORT, () => {
