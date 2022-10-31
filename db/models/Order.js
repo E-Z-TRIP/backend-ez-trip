@@ -11,6 +11,7 @@ const orderSchema = mongoose.Schema({
     nbTravelers: Number,
     comments: String,
     status: String,
+    totalPrice : Number,
 })
 
 const Order = mongoose.model('orders', orderSchema)
