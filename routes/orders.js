@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
   //* GET AN ORDER TO DISPLAY - QUOTATION RECEIVED
 
   router.get('/offer', (req, res) => {
-    const {id} = req.body
+    const id = req.body.id
     Order.findById({_id : id})
     .populate('trip')
     .then((data) => {
@@ -51,6 +51,22 @@ router.post('/', async (req, res) => {
       }
     })
   })
+
+    //* GET THE ORDERS FROM ONE USER
+
+    router.get('/ordersByUser/:token', (req, res) => {
+      const token = req.params.token
+      Order.find({user : token})
+      .populate('trip')
+      .then((data) => {
+        if (data) {
+          res.json({result:true, data : data})
+        }
+        else {
+          res.json({result: false, error : 'order not found'})
+        }
+      })
+    })
 
 
   //* UPDATE LE STATUS
