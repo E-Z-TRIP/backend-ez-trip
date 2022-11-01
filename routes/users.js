@@ -155,11 +155,18 @@ router.post('/like', (req, res) => {
 
   //Trouve le bon User à qui rajouter le trip liké, via le token renvoyé par le front
   User.findOne({ token: req.body.token }).then((data) => {
+    console.log(req.body.tripID)
     if (data) {
-      //push l'ID du trip liked dans la BDD
-      data.tripsLiked.push(req.body.tripID);
+      if(data.tripsLiked.some(e => e === req.body.tripID)) {
+        res.json({ result: false, error: "Trip déjà liké en BDD" });
+      }
+      else {
+        data.tripsLiked.push(req.body.tripID);
       data.save();
       res.json({ result: true, user: data });
+      }
+      //push l'ID du trip liked dans la BDD
+      
     }
     //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
     else {

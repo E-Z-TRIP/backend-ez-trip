@@ -64,6 +64,22 @@ router.post('/', async (req, res) => {
     })
   })
 
+    //* GET THE ORDERS FROM ONE USER
+
+    router.get('/ordersByUser/:token', (req, res) => {
+      const token = req.params.token
+      Order.find({user : token})
+      .populate('trip')
+      .then((data) => {
+        if (data) {
+          res.json({result:true, data : data})
+        }
+        else {
+          res.json({result: false, error : 'order not found'})
+        }
+      })
+    })
+
 
   //* ------------ UPDATE LE STATUS -----------------  requested -> received -> validated
 
