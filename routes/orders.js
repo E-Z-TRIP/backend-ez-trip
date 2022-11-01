@@ -38,10 +38,11 @@ router.post('/', async (req, res) => {
 
   //* GET AN ORDER TO DISPLAY - QUOTATION RECEIVED
 
-  router.get('/offer', (req, res) => {
-    const id = req.body.id
+  router.get('/offer/:id', (req, res) => {
+    const {id} = req.params
     Order.findById({_id : id})
     .populate('trip')
+    // .populate({path: 'trip', populate: {path : 'partnerID'}})
     .then((data) => {
       if (data) {
         res.json({result:true, data : data})
