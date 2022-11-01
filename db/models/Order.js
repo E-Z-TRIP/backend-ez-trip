@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 
 
 const orderSchema = mongoose.Schema({
-    user : [{type: mongoose.Schema.Types.ObjectId, ref : 'users'}],
-    trip : [{type: mongoose.Schema.Types.ObjectId, ref: 'trips'}],
+    user : {type: mongoose.Schema.Types.ObjectId, ref : 'users'},
+    trip : {type: mongoose.Schema.Types.ObjectId, ref: 'trips'},
     start : Date,
     end : Date,
     nbDays: Number,
