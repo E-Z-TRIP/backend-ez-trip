@@ -52,17 +52,7 @@ router.post('/', async (req, res) => {
       }
     })
   })
- //* ------------- GET ALL THE ORDERS ----------- 
-  router.get('/', (req, res) => {
-    Order.find()
-    .then((data) => {
-      if (data) {
-        res.json({result : true, orders: data})
-      } else {
-        res.json({result: false, error : 'no order in DB'})
-      }
-    })
-  })
+ 
 
     //* GET THE ORDERS FROM ONE USER
 
