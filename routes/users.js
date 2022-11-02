@@ -42,7 +42,13 @@ router.post('/signup', (req, res) => {
 
       //renvoyer le token vers le front pour le store dans le reducer
       newUser.save().then((data) => {
-        res.json({ result: true, token: data.token });
+        res.json({
+          result: true,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          token: data.token,
+        });
       });
     } else {
       // L'email fourni est déjà en database : le user est déjà inscrit
@@ -155,18 +161,16 @@ router.post('/like', (req, res) => {
 
   //Trouve le bon User à qui rajouter le trip liké, via le token renvoyé par le front
   User.findOne({ token: req.body.token }).then((data) => {
-    console.log(req.body.tripID)
+    console.log(req.body.tripID);
     if (data) {
-      if(data.tripsLiked.some(e => e === req.body.tripID)) {
-        res.json({ result: false, error: "Trip déjà liké en BDD" });
-      }
-      else {
+      if (data.tripsLiked.some((e) => e === req.body.tripID)) {
+        res.json({ result: false, error: 'Trip déjà liké en BDD' });
+      } else {
         data.tripsLiked.push(req.body.tripID);
-      data.save();
-      res.json({ result: true, user: data });
+        data.save();
+        res.json({ result: true, user: data });
       }
       //push l'ID du trip liked dans la BDD
-      
     }
     //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
     else {
@@ -185,40 +189,37 @@ router.get('/like/:token', (req, res) => {
     return;
   }
 
-    User.findOne({ token: req.params.token })
-    .then(data => {
-      if(data) {
-        //renvoi tous les objets contenus dans tripsLiked
-        res.json({ result: true, tripsLiked: data.tripsLiked });
-      }
-      //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
-      else {
-        res.json({ result: false, error: 'User not found' });
-      }
-    });
+  User.findOne({ token: req.params.token }).then((data) => {
+    if (data) {
+      //renvoi tous les objets contenus dans tripsLiked
+      res.json({ result: true, tripsLiked: data.tripsLiked });
+    }
+    //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+    else {
+      res.json({ result: false, error: 'User not found' });
+    }
+  });
 });
 
 ////DELETE A TRIP FROM THE LIKES REQ.BODY = token, tripID
 
 router.delete('/like', async (req, res) => {
-
-  console.log("req.body", req.body);
-   // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
-   if (!checkBody(req.body, ['token']))
-   {console.log('ata');
+  console.log('req.body', req.body);
+  // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
+  if (!checkBody(req.body, ['token'])) {
+    console.log('ata');
     res.json({ result: false, error: 'User not connected' });
     return;
-    }
+  }
 
-   await User.updateOne({token: req.body.token}, {$pull: {tripsLiked: req.body.tripID}})
-   
-   res.json({result: true})
-// User.findOne({token: req.body.token}).then((data) => {
-//   data.tripsLiked.pull(req.body.tripID);
-//   data.save();
-// }).then(res.json({result: true}))
+  await User.updateOne({ token: req.body.token }, { $pull: { tripsLiked: req.body.tripID } });
 
-})
+  res.json({ result: true });
+  // User.findOne({token: req.body.token}).then((data) => {
+  //   data.tripsLiked.pull(req.body.tripID);
+  //   data.save();
+  // }).then(res.json({result: true}))
+});
 
 //////////////////////////////////////////////////////////// DOCUMENTS ///////////////////////////////////////////////////////////////////////////
 
