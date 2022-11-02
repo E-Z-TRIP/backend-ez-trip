@@ -5,6 +5,8 @@ import { validateReqBody } from '../lib/helpers.js';
 import Partner from '../db/models/Partner.js';
 import Trip from '../db/models/Trip.js';
 import Order from '../db/models/Order.js'
+import User from '../db/models/User.js'
+
 const router = express.Router();
 
 //! status : 'requested' - 'received' - 'validated'
@@ -37,38 +39,29 @@ router.post('/', async (req, res) => {
     }
   });
 
-  //* -------------- GET AN ORDER TO DISPLAY - QUOTATION RECEIVED --------------
+  //* -------------- GET ALL THE ORDER OF A GIVEN USER --------------
 
-  router.get('/offer/:id', (req, res) => {
-    const {id} = req.params
-    Order.findById({_id : id})
-    .populate('trip')
-    .then((data) => {
-      if (data) {
-        res.json({result:true, data : data})
+  router.get('/:token', (req, res) => {
+    const {token} = req.params
+    User.findOne({token: token})
+    .then((dataUser) => {
+      if(dataUser) {
+        Order.find({user: dataUser._id})
+        .populate('trip')
+        .then(orderResult => {
+          if(orderResult) {
+            res.json({ result: true, data: orderResult });
+          }
+          else {res.json({ result: true, data: 'Not order in BDD' })}
+        })
       }
       else {
-        res.json({result: false, error : 'order not found'})
-      }
+        res.json({ result: false, error: 'User not found' });
+      }  
     })
   })
  
 
-    //* GET THE ORDERS FROM ONE USER
-
-    router.get('/ordersByUser/:token', (req, res) => {
-      const token = req.params.token
-      Order.find({user : token})
-      .populate('trip')
-      .then((data) => {
-        if (data) {
-          res.json({result:true, data : data})
-        }
-        else {
-          res.json({result: false, error : 'order not found'})
-        }
-      })
-    })
 
 
   //* ------------ UPDATE LE STATUS -----------------  requested -> received -> validated
