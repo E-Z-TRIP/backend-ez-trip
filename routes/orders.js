@@ -1,8 +1,9 @@
 import express, { Router } from 'express';
 import bcrypt from 'bcrypt';
 import uid2 from 'uid2';
-import { validateReqBody } from '../lib/helpers.js';
+import { checkBody } from '../lib/helpers.js';
 import Partner from '../db/models/Partner.js';
+import User from '../db/models/User.js'
 import Trip from '../db/models/Trip.js';
 import Order from '../db/models/Order.js'
 const router = express.Router();
@@ -12,29 +13,36 @@ const router = express.Router();
 //* ---------------------- ADD AN ORDER -----------------------
 
 router.post('/', async (req, res) => {
-    if (
-      validateReqBody({
-        body: req.body,
-        expectedPropertys: ['user', 'trip', 'start','end', 'nbDays', 'nbTravelers', 'comments', "totalPrice"],
-      })
-    ) {
-      const { user, trip, nbDays, nbTravelers,start,end, comments, totalPrice } = req.body; 
-      new Order({
-        user,
-        trip,
-        start,
-        end,
-        bookingDate: new Date(),
-        nbDays,
-        nbTravelers,
-        comments, 
-        totalPrice,
-        status : 'Requested', // 
-      }).save().then(data => {
-          res.json({ result: true, newOrder: data }); //? a verifier
+  if (checkBody(req.body, ['user', 'trip', 'nbDays', 'nbTravelers', 'start', 'end', 'totalPrice'])) {
+      const { user, trip, nbDays, nbTravelers,start, end, comments, totalPrice } = req.body; 
+      User.find({token : user})
+      .then((data) => {
+        if (data) {
+          new Order({
+            user : data.id,
+            trip,
+            start,
+            end,
+            bookingDate: new Date(),
+            nbDays,
+            nbTravelers,
+            comments, 
+            totalPrice,
+            status : 'Requested', // 
+          }).save().then(data => {
+            if (data) {
+              res.json({ result: true, newOrder: data });
+            } else {
+              res.json({result : false, error : 'new Order failed'})
+            }
+          })
+        }
+        else {
+          res.json({result: false, error : 'user not found'})
+        }
       })
     } else {
-      res.json({ result: false, error: 'Invalid data' }); //? a verifier
+      res.json({ result: false, error: 'Invalid data input' });
     }
   });
 
