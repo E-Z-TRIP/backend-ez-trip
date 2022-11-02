@@ -186,6 +186,7 @@ router.get('/like/:token', (req, res) => {
   }
 
     User.findOne({ token: req.params.token })
+    .populate('tripsLiked')
     .then(data => {
       if(data) {
         //renvoi tous les objets contenus dans tripsLiked
