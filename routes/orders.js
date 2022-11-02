@@ -46,8 +46,9 @@ router.post('/', async (req, res) => {
     }
   });
 
+ 
   //* -------------- GET AN ORDER TO DISPLAY  --------------
-
+// get an order
   router.get('/offer/:id', (req, res) => {
     const {id} = req.params
     Order.findById({_id : id})
@@ -61,7 +62,6 @@ router.post('/', async (req, res) => {
       }
     })
   })
- 
 
     //* GET THE ORDERS FROM ONE USER
 
