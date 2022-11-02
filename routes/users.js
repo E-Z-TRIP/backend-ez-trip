@@ -175,7 +175,7 @@ router.post('/like', (req, res) => {
   });
 });
 
-////GET THE TRIPS LIKED BY USER
+////GET THE TRIPS /!\WITH DETAILS/!\ LIKED BY USER
 
 router.get('/like/:token', (req, res) => {
   console.log(req.params);
@@ -187,6 +187,29 @@ router.get('/like/:token', (req, res) => {
 
     User.findOne({ token: req.params.token })
     .populate('tripsLiked')
+    .then(data => {
+      if(data) {
+        //renvoi tous les objets contenus dans tripsLiked
+        res.json({ result: true, tripsLiked: data.tripsLiked });
+      }
+      //si le token n'est pas reconnu, le user n'est pas enregistré en BDD.
+      else {
+        res.json({ result: false, error: 'User not found' });
+      }
+    });
+});
+
+////GET /!\JUST THE IDs OF THE TRIPS LIKED BY USER
+
+router.get('/idLike/:token', (req, res) => {
+  console.log(req.params);
+  // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
+  if (!req.params.token) {
+    res.json({ result: false, error: 'User not connected' });
+    return;
+  }
+
+    User.findOne({ token: req.params.token })
     .then(data => {
       if(data) {
         //renvoi tous les objets contenus dans tripsLiked
