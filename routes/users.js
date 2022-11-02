@@ -224,7 +224,6 @@ router.delete('/like', async (req, res) => {
 //////////////////////////////////////////////////////////// DOCUMENTS ///////////////////////////////////////////////////////////////////////////
 
 /////AJOUTER UN DOCUMENT A SON ESPACE : REQ.BODY = token, formData
-
 router.post('/upload', async (req, res) => {
   // Si le token n'est pas reçu, le User n'est pas connecté et ne peut donc pas sauvegarder de trips.
   if (!checkBody(req.body, ['token'])) {
