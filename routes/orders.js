@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import uid2 from 'uid2';
 import { checkBody } from '../lib/helpers.js';
 import Partner from '../db/models/Partner.js';
-import User from '../db/models/User.js'
 import Trip from '../db/models/Trip.js';
 import Order from '../db/models/Order.js'
 import User from '../db/models/User.js'
