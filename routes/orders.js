@@ -47,28 +47,22 @@ router.post('/', async (req, res) => {
     }
   });
 
-  //* -------------- GET ALL THE ORDER OF A GIVEN USER --------------
 
-  router.get('/:token', (req, res) => {
-    const {token} = req.params
-    User.findOne({token: token})
-    .then((dataUser) => {
-      if(dataUser) {
-        Order.find({user: dataUser._id})
-        .populate('trip')
-        .then(orderResult => {
-          if(orderResult) {
-            res.json({ result: true, data: orderResult });
-          }
-          else {res.json({ result: true, data: 'Not order in BDD' })}
-        })
+  //* -------------- GET AN ORDER TO DISPLAY  --------------
+// get an order
+  router.get('/offer/:id', (req, res) => {
+    const {id} = req.params
+    Order.findById({_id : id})
+    .populate('trip')
+    .then((data) => {
+      if (data) {
+        res.json({result:true, data : data})
       }
       else {
         res.json({ result: false, error: 'User not found' });
       }  
     })
   })
- 
 
 
 
