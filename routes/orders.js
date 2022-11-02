@@ -7,7 +7,7 @@ import Trip from '../db/models/Trip.js';
 import Order from '../db/models/Order.js'
 const router = express.Router();
 
-//! status : 'requested' - 'received' - 'validated'
+//! status : 'Requested' - 'Received' - 'Validated'
 
 //* ---------------------- ADD AN ORDER -----------------------
 
@@ -24,11 +24,12 @@ router.post('/', async (req, res) => {
         trip,
         start,
         end,
+        bookingDate: new Date(),
         nbDays,
         nbTravelers,
         comments, 
         totalPrice,
-        status : 'Quotation requested', // 
+        status : 'Requested', // 
       }).save().then(data => {
           res.json({ result: true, newOrder: data }); //? a verifier
       })
@@ -37,7 +38,7 @@ router.post('/', async (req, res) => {
     }
   });
 
-  //* -------------- GET AN ORDER TO DISPLAY - QUOTATION RECEIVED --------------
+  //* -------------- GET AN ORDER TO DISPLAY  --------------
 
   router.get('/offer/:id', (req, res) => {
     const {id} = req.params
@@ -88,9 +89,9 @@ router.post('/', async (req, res) => {
               }}}}
             ]  
             ).then(() => {
-                Order.find().then(data => {
+                Order.findOne({_id : orderID}).then(data => {
 
-                    res.json({ result: true, Orders: data }); 
+                    res.json({ result: true, status: data.status }); 
                 })
             })
   })
