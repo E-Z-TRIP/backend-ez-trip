@@ -70,47 +70,49 @@ router.get('/filter', (req, res) => {
     //Array de réponse où push les résultats du filtre
     const response = []
     //définition des constantes de mois pour comparer à l'intervale
-    let minDay = (filters.minDurationDay ? filters.minDurationDay : 1)
-    let maxDay = (filters.maxDurationDay ? filters.maxDurationDay : 365)
-    let startMonth = (filters.startMonth ? filters.startMonth : 1)
-    let endMonth = (filters.endMonth ? filters.endMonth : 12)
-    let minBudget = (filters.minBudget ? filters.minBudget : 0)
-    let maxBudget = (filters.maxBudget ? filters.maxBudget : 30000)
-
+    let startMonth = Number(filters.startMonth != '' ? filters.startMonth : 1)
+    let endMonth = Number(filters.endMonth != '' ? filters.endMonth : 12)
+    let minBudget = Number(filters.minBudget ? filters.minBudget : 0)
+    let maxBudget = Number(filters.maxBudget ? filters.maxBudget : 30000)
+    let searchInput = (filters.searchInput != '' ? filters.searchInput : '')
+    let tags = filters.tags ? filters.tags : []
+    console.log(startMonth, endMonth, minBudget, maxBudget)
         Trip.find()
         .then(data => {
-            
-            for (let key in filters) {
-                //Si les filtres concernent des nombres (et donc des intervales, type date, prix...)
-                if (typeof Number(filters[key]) === 'number') {
-                    data.map((trip,i) => {
-                        let minPriceTrip = trip.program[0].price; //prix du plus court programme = "à partir de...€"
-                        // console.log('TRIP N°' + i)
-                        // console.log('priceTrip', minPriceTrip,maxPriceTrip)
-                        // console.log('priceSearch', minBudget,maxBudget)
-                        // console.log('durationDayTrip', trip.minDurationDay, trip.maxDurationDay)
-                        // console.log('durationDaySearch', minDay, maxDay)
-                        // console.log('travelPeriodTrip', trip.travelPeriod[0].start, trip.travelPeriod[0].end)
-                        // console.log('travelPeriodSearch', startMonth, endMonth)
+           
+              data.map((trip, i) => {
+              //constantes du trip du catalogue à comparer
+              let startMonthTrip = trip.travelPeriod[0].start; //début de la travel period du trip
+              let endMonthTrip = trip.travelPeriod[0].end; //fin de la travel period du trip
+              let minPriceTrip = trip.program[0].price; //prix du plus court programme = "à partir de...€"
+              //est-ce que le tag fourni en query peut être retrouvé dans le tags Array du Trip (true par défaut si pas de valeur fournie)
+              // let tagMatch = trip.tags.length > 0 && tags.length > 0 ? trip.tags.some(tag => tags.find(e => e==tag)) : true;
+              if (!response.some(e => e.id === trip.id) 
+              //condition pour que le budget matche
+              && (minPriceTrip >= minBudget && minPriceTrip <= maxBudget) 
+              //condition pour que la travelPeriod matche
+              // &&  startMonth<=startMonthTrip && endMonthTrip <= endMonth
+              // && startMonthTrip <= endMonth && endMonth <= endMonthTrip
+              // && tagMatch
+              )
+              {
+                response.push(trip)
+              }
+              })
 
-                       if ((minPriceTrip >= minBudget && minPriceTrip <= maxBudget) && (trip.minDurationDay >= minDay && trip.maxDurationDay <= maxDay) && (trip.travelPeriod[0].start >= startMonth && trip.travelPeriod[0].end <= endMonth) && response.filter(e => e.id === trip.id).length === 0) 
-                       {response.push(trip)};
-                })
-                }
                 //Si les filtres sont des arrays de strings
-                else if (key === 'tags', key === 'included') {
-                    data.map(trip => {
-                        trip[key].indexOf(filters[key]) != -1 && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
-                })
-                }
+                // else if ((key === 'tags' || key === 'included') && filters[key].length > 0) {
+                //     data.map(trip => {
+                //         if(trip[key].some(e => {
+                //           filters[key].map (el => el.title === e)
+                //         }) && !response.some(e => e.id === trip.id)) {
+                //           console.log(trip.name)
+                //         }
+                //       })
+                // }
                 //pour tous les autres query parameters : 
-                else {
-                    data.map(trip => {
-                        trip[key] == filters[key] && response.filter(e => e.id === trip.id).length === 0 ? response.push(trip) : false;
-                })
-                }
                 
-            };
+            
             //si la réponse contient au moins un trip, renvoyer la réponse
             if(response.length > 0) {
                 res.json({ result: true, trips: response});
