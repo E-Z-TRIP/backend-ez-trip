@@ -15,7 +15,7 @@ import uniqid from 'uniqid';
 
 router.post('/signup', (req, res) => {
   console.log(req.body);
-  if (!checkBody(req.body, ['lastName', 'firstName', 'password', 'email'])) {
+  if (!checkBody(req.body, ['firstName', 'lastName', 'password', 'email'])) {
     res.json({ result: false, error: 'Missing or empty fields' });
     return;
   }
