@@ -110,6 +110,6 @@ router.get('/filter', (req, res) => {
               }
         }) 
   });
-});
+;
 
 export default router;

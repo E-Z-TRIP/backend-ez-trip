@@ -16,7 +16,7 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   if (checkBody(req.body, ['user', 'trip', 'nbDays', 'nbTravelers', 'start', 'end', 'totalPrice'])) {
       const { user, trip, nbDays, nbTravelers,start, end, comments, totalPrice } = req.body; 
-      User.find({token : user})
+      User.findOne({token : user})
       .then((data) => {
         if (data) {
           new Order({
