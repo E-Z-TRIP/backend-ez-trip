@@ -106,7 +106,7 @@ router.get('/filter', (req, res) => {
     else {
       res.json({ result: false, error: 'No trips corresponding to the filters' });
     }
-  });
+  })})
 ;
 
 export default router;
